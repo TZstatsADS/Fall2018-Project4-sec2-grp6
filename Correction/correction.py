@@ -1,6 +1,3 @@
-from correction_lib import Find_Candidates_Insertion, Find_Candidates_Deletion, Find_Candidates_Reverse, Find_Candidates_Substitution
+from correction_lib import Find_Candidates_Insertion, Find_Candidates_Deletion, Find_Candidates_Reverse, Find_Candidates_Substitution, Find_Possible_Candidates
 
-# First we need to create dictionary which help us find the possible candidates
-
-
-print(Find_Candidates_Reverse("lubboists"))
+print(Find_Possible_Candidates("acress"))

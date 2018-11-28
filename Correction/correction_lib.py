@@ -184,3 +184,20 @@ def Find_Candidates_Reverse(Typo):
         return(Reverse_Dic[Typo])
     else:
         return([])
+
+
+
+# function to find all possible candidates for typo
+def Find_Possible_Candidates(Typo):
+    # First we need to create dictionary which help us find the possible candidates
+    Possible_Candidates = dict()
+
+    Possible_Candidates["Insertion"] = Find_Candidates_Insertion(Typo)
+
+    Possible_Candidates["Deletion"] = Find_Candidates_Deletion(Typo)
+
+    Possible_Candidates["Reverse"] = Find_Candidates_Reverse(Typo)
+
+    Possible_Candidates["Substitution"] = Find_Candidates_Substitution(Typo)
+
+    return(Possible_Candidates)
