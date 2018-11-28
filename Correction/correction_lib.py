@@ -1,4 +1,5 @@
 import os
+import string
 
 
 # Function to get the file end with .txt
@@ -118,6 +119,7 @@ def Find_Candidates_Insertion(Typo):
     return(Candidates)
 
 # Next create table dictionary for deletion for each words
+# Each element is (True Word, Position to delete)
 Deletion_Dic = dict()
 
 for ground_truth_word in Ground_Truth_Words:
@@ -137,5 +139,48 @@ def Find_Candidates_Deletion(Typo):
         return([])
 
 
+# Next create table dictionary for Substitute for each words
+# Each element is (True Word, First Position, Second Position)
+Substitution_Dic = dict()
 
-# Next create tables
+for ground_truth_word in Ground_Truth_Words:
+    for index in range(len(ground_truth_word)):
+        for substitution_letter in list(string.ascii_lowercase):
+            temp_typo = Substitute_Letter(ground_truth_word, substitution_letter, index)
+            if temp_typo in Substitution_Dic:
+                Substitution_Dic[temp_typo].append((ground_truth_word, substitution_letter, index))
+            else:
+                Substitution_Dic[temp_typo] = list()
+                Substitution_Dic[temp_typo].append((ground_truth_word, substitution_letter, index))
+
+
+# function for find the possibile candidates with Substitution
+def Find_Candidates_Substitution(Typo):
+    if Typo in Substitution_Dic:
+        return(Substitution_Dic[Typo])
+    else:
+        return([])
+
+
+# Next create table dictionary for Reverse for each words
+# Each element is (True Word, First Position, Second Position)
+Reverse_Dic = dict()
+
+for ground_truth_word in Ground_Truth_Words:
+    for i in range(len(ground_truth_word)):
+        for j in range(i+1, len(ground_truth_word)):
+            temp_typo = Reverse_Letter(ground_truth_word, i, j)
+            if temp_typo != ground_truth_word:
+                if temp_typo in Reverse_Dic:
+                    Reverse_Dic[temp_typo].append((ground_truth_word, i, j))
+                else:
+                    Reverse_Dic[temp_typo] = list()
+                    Reverse_Dic[temp_typo].append((ground_truth_word, i, j))
+
+
+# function for find the possibile candidates with Reverse
+def Find_Candidates_Reverse(Typo):
+    if Typo in Reverse_Dic:
+        return(Reverse_Dic[Typo])
+    else:
+        return([])
