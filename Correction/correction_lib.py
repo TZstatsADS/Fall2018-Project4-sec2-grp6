@@ -190,6 +190,8 @@ def Find_Candidates_Reverse(Typo):
 # function to find all possible candidates for typo
 def Find_Possible_Candidates(Typo):
     # First we need to create dictionary which help us find the possible candidates
+    Typo = Typo.lower()
+
     Possible_Candidates = dict()
 
     Possible_Candidates["Insertion"] = Find_Candidates_Insertion(Typo)
@@ -201,3 +203,77 @@ def Find_Possible_Candidates(Typo):
     Possible_Candidates["Substitution"] = Find_Candidates_Substitution(Typo)
 
     return(Possible_Candidates)
+
+
+# Next create confusion matrix for Deletion, Insertion, Substitution, Reversal
+Deletion_Confusion = [[0]*26]*27
+Insertion_Confusion = [[0]*26]*27
+Substitution_Confusion = [[0]*26]*26
+Reversal_Confusion = [[0]*26]*26
+
+def getLetterIndex(letter):
+    if letter == "":
+        return(26)
+    else:
+        return(string.ascii_lowercase.index(letter))
+
+def Delete_Non_Letter(Stringlist):
+    ResultList = Stringlist
+    while '—' in Stringlist:
+        ResultList.remove('—')
+    while '•' in Stringlist:
+        ResultList.remove('•')
+    while ',' in Stringlist:
+        ResultList.remove('•')
+    while '.' in Stringlist:
+        ResultList.remove('•')
+
+    return(ResultList)
+
+Word_Dict = dict()
+
+for FileName in File_Names:
+    Word_Dict[FileName] = dict()
+    Ground_Truth_File_Dir = Ground_Truth_Path + FileName + ".txt"
+    Tesseract_File_Dir = Tesseract_Path + FileName + ".txt"
+    with open(Ground_Truth_File_Dir, 'r') as file:
+        Ground_Truth_file_Content = file.readlines()
+        Word_Dict[FileName]["ground_truth"] = Ground_Truth_file_Content
+
+    with open(Tesseract_File_Dir, 'r') as file:
+        Tesseract_file_Content = file.readlines()
+        Word_Dict[FileName]["tesseract"] = Tesseract_file_Content
+
+for Each_File in Word_Dict:
+    Ground_Truth = Word_Dict[Each_File]["ground_truth"]
+    Tesseract = Word_Dict[Each_File]["tesseract"]
+    for Line_Index in range(len(Ground_Truth)):
+        if Line_Index == 1:
+            # remove \n and \r
+            Ground_Truth_Line = Ground_Truth[Line_Index].rstrip()
+            Tesseract_Line = Tesseract[Line_Index].rstrip()
+            # next we need to split the lines by spaces
+            Ground_Truth_Line_Words = Delete_Non_Letter(Ground_Truth_Line.split())
+            Tesseract_Line_Words = Delete_Non_Letter(Tesseract_Line.split())
+            Min_Length = min(len(Ground_Truth_Line_Words), len(Tesseract_Line_Words))
+            for word_index in range(Min_Length):
+                # first remove all non alphabet letter including ; , . / 0-9
+                Ground_Truth_Line_Word = clean_word(Ground_Truth_Line_Words[word_index])
+                Tesseract_Line_Word = clean_word(Tesseract_Line_Words[word_index])
+                if Ground_Truth_Line_Word != Tesseract_Line_Word and max(len(Ground_Truth_Line_Word), len(Tesseract_Line_Word))-min(len(Ground_Truth_Line_Word), len(Tesseract_Line_Word)) <= 1:
+                    # Then we divided them into three different ways
+                    # First if Ground_Truth_Line_Word is less than Tesseract_Line_Word, it should be Insertion
+                    if len(Ground_Truth_Line_Word) < len(Tesseract_Line_Word):
+                        pass
+
+                    # Second if Ground_Truth_Line_Word is larger than Tesseract_Line_Word, it should be Deletion
+                    elif len(Ground_Truth_Line_Word) > len(Tesseract_Line_Word):
+                        pass
+
+                    # Third if Ground_Truth_Line_Word is equal to Tesseract_Line_Word, it should be Substitution or Reversal
+                    else:
+                        pass
+
+
+            # print(Ground_Truth_Line_Words)
+            # print(Tesseract_Line_Words)
