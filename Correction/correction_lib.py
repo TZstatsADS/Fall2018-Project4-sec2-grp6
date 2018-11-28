@@ -5,7 +5,7 @@ def Get_FileNames(path):
 
     File_Lists = list()
 
-    for ground_truth_file in os.listdir(Ground_Truth_Path):
+    for ground_truth_file in os.listdir(path):
         if ground_truth_file.endswith(".txt"):
             File_Lists.append(ground_truth_file)
 
@@ -21,34 +21,13 @@ def clean_word(w):
             out.append(c)
     return ''.join(out)
 
+
 # Check the length of the words
 def clean_word2(w):
     if len(w) < 21 and len(w) >1:
         return True
     else:
         return False
-
-# First we need to create dictionary which help us find the possible candidates
-
-Ground_Truth_Path = "../data/ground_truth/"
-
-Tesseract_Path = "../data/tesseract/"
-
-Ground_Truth_Files = Get_FileNames(Ground_Truth_Path)
-
-File_Names = [filename[: -4] for filename in Ground_Truth_Files]
-
-Ground_Truth_Words = set()
-
-for FileName in File_Names:
-    File_Dir = Ground_Truth_Path + FileName + ".txt"
-    with open(File_Dir, 'r') as file:
-        file_Content = file.read()
-        uncleaned_word = file_Content.split()
-        Ground_Truth_Words = Ground_Truth_Words.union(set(map(clean_word,uncleaned_word)))
-
-
-Ground_Truth_Words = set(filter(clean_word2, Ground_Truth_Words))
 
 # Get the word with length n
 def filter_word(n):
@@ -59,10 +38,10 @@ def filter_word(n):
             return False
     return(filter)
 
-
 # wordFilter = filter_word(5)
 #
 # print(set(filter(wordFilter, Ground_Truth_Words)))
+
 
 # Intert the letter into specific position in the string
 def Insert_Letter(String, Letter, Position):
@@ -100,7 +79,10 @@ def Reverse_Letter(String, Position1, Position2):
 
 
 # function for find the posibile candidates with inertation
-def Find_Candidates_Insertion(Typo):
+def Find_Candidates_Insertion(Typo, Ground_Truth_Words):
+    '''
+    
+    '''
     Candidates = list()
     Candidates_Length = len(Typo) - 1
     PossibleWords = set(filter(filter_word(Candidates_Length), Ground_Truth_Words))
@@ -110,11 +92,3 @@ def Find_Candidates_Insertion(Typo):
             if Typo == Temp_String:
                 Candidates.append((String, Typo[index], index))
     return(Candidates)
-
-
-
-
-
-
-
-print(Find_Candidates_Insertion("avoidded"))
