@@ -1,5 +1,6 @@
 import os
 import string
+import difflib
 
 
 # Function to get the file end with .txt
@@ -206,17 +207,22 @@ def Find_Possible_Candidates(Typo):
 
 
 # Next create confusion matrix for Deletion, Insertion, Substitution, Reversal
-Deletion_Confusion = [[0]*26]*27
-Insertion_Confusion = [[0]*26]*27
-Substitution_Confusion = [[0]*26]*26
-Reversal_Confusion = [[0]*26]*26
+Deletion_Confusion = [[0] * 26 for i in range(27)]
+Insertion_Confusion = [[0] * 26 for i in range(27)]
+Substitution_Confusion = [[0] * 26 for i in range(26)]
+Reversal_Confusion = [[0] * 26 for i in range(26)]
 
+
+# get the letter index in the matrix
 def getLetterIndex(letter):
-    if letter == "":
+
+    if letter == " ":
         return(26)
     else:
         return(string.ascii_lowercase.index(letter))
 
+
+# delete non letter single string in the list
 def Delete_Non_Letter(Stringlist):
     ResultList = Stringlist
     while '—' in Stringlist:
@@ -224,11 +230,115 @@ def Delete_Non_Letter(Stringlist):
     while '•' in Stringlist:
         ResultList.remove('•')
     while ',' in Stringlist:
-        ResultList.remove('•')
+        ResultList.remove(',')
     while '.' in Stringlist:
-        ResultList.remove('•')
+        ResultList.remove('.')
 
     return(ResultList)
+
+
+# find the which letter is delete after the one letter
+def find_deletion_letters(ground_truth_word, tesseract_word):
+
+    SequenceList = difflib.SequenceMatcher(None, ground_truth_word, tesseract_word).get_opcodes()
+
+    pre_letter = ""
+
+    delete_letter = ""
+
+    if len(SequenceList) == 3 or len(SequenceList) == 2:
+        for tag, a1, a2, b1, b2 in SequenceList:
+            if tag == 'delete':
+                if a1-1 >= 0:
+                    pre_letter = ground_truth_word[a1-1]
+                    delete_letter = ground_truth_word[a1]
+                else:
+                    pre_letter = " "
+                    delete_letter = ground_truth_word[a1]
+
+    if pre_letter in string.ascii_lowercase and delete_letter in string.ascii_lowercase:
+        return({"pre_letter" : pre_letter, "delete_letter": delete_letter})
+    else:
+        pre_letter = ""
+
+        delete_letter = ""
+
+        return({"pre_letter" : pre_letter, "delete_letter": delete_letter})
+
+
+
+# find the which letter is intert after the one letter
+def find_insertion_letters(ground_truth_word, tesseract_word):
+
+    SequenceList = difflib.SequenceMatcher(None, ground_truth_word, tesseract_word).get_opcodes()
+
+    pre_letter = ""
+
+    insert_letter = ""
+
+    if len(SequenceList) == 3 or len(SequenceList) == 2:
+        for tag, a1, a2, b1, b2 in SequenceList:
+            if tag == 'insert':
+                if a1-1 >= 0:
+                    pre_letter = ground_truth_word[a1-1]
+                    insert_letter = tesseract_word[a1]
+                else:
+                    pre_letter = " "
+                    insert_letter = tesseract_word[a1]
+
+    if pre_letter in string.ascii_lowercase and insert_letter in string.ascii_lowercase:
+        return({"pre_letter" : pre_letter, "insert_letter": insert_letter})
+    else:
+        pre_letter = ""
+
+        insert_letter = ""
+
+        return({"pre_letter" : pre_letter, "insert_letter": insert_letter})
+
+
+
+# find the which letter is reverse with the letter after or substitute with other letter
+def find_sub_rev_letters(ground_truth_word, tesseract_word):
+
+    Differ_Index = [index for index in range(len(ground_truth_word)) if ground_truth_word[index] != tesseract_word[index]]
+
+    pre_letter = ""
+
+    changed_letter = ""
+
+    tag = ""
+
+    if len(Differ_Index) == 1:
+        tag = "sub"
+
+        pre_letter = ground_truth_word[Differ_Index[0]]
+
+        changed_letter = tesseract_word[Differ_Index[0]]
+
+    elif len(Differ_Index) == 2:
+        ground_truth_pre_letter = ground_truth_word[Differ_Index[0]]
+        tesseract_pre_letter = tesseract_word[Differ_Index[0]]
+        ground_truth_pos_letter = ground_truth_word[Differ_Index[1]]
+        tesseract_pos_letter = tesseract_word[Differ_Index[1]]
+
+        if ground_truth_pre_letter == tesseract_pos_letter and ground_truth_pos_letter == tesseract_pre_letter:
+            tag = "rev"
+            pre_letter = ground_truth_word[Differ_Index[0]]
+            changed_letter = tesseract_word[Differ_Index[0]]
+
+    if pre_letter in string.ascii_lowercase and changed_letter in string.ascii_lowercase:
+        return({"tag": tag, "pre_letter" : pre_letter, "changed_letter": changed_letter})
+    else:
+        tag = ""
+        changed_letter = ""
+
+        changed_letter = ""
+
+        return({"tag": tag, "pre_letter" : pre_letter, "changed_letter": changed_letter})
+
+
+
+
 
 Word_Dict = dict()
 
@@ -247,33 +357,58 @@ for FileName in File_Names:
 for Each_File in Word_Dict:
     Ground_Truth = Word_Dict[Each_File]["ground_truth"]
     Tesseract = Word_Dict[Each_File]["tesseract"]
-    for Line_Index in range(len(Ground_Truth)):
-        if Line_Index == 1:
-            # remove \n and \r
-            Ground_Truth_Line = Ground_Truth[Line_Index].rstrip()
-            Tesseract_Line = Tesseract[Line_Index].rstrip()
-            # next we need to split the lines by spaces
-            Ground_Truth_Line_Words = Delete_Non_Letter(Ground_Truth_Line.split())
-            Tesseract_Line_Words = Delete_Non_Letter(Tesseract_Line.split())
-            Min_Length = min(len(Ground_Truth_Line_Words), len(Tesseract_Line_Words))
-            for word_index in range(Min_Length):
-                # first remove all non alphabet letter including ; , . / 0-9
-                Ground_Truth_Line_Word = clean_word(Ground_Truth_Line_Words[word_index])
-                Tesseract_Line_Word = clean_word(Tesseract_Line_Words[word_index])
-                if Ground_Truth_Line_Word != Tesseract_Line_Word and max(len(Ground_Truth_Line_Word), len(Tesseract_Line_Word))-min(len(Ground_Truth_Line_Word), len(Tesseract_Line_Word)) <= 1:
-                    # Then we divided them into three different ways
-                    # First if Ground_Truth_Line_Word is less than Tesseract_Line_Word, it should be Insertion
-                    if len(Ground_Truth_Line_Word) < len(Tesseract_Line_Word):
-                        pass
+    for Line_Index in range(min(len(Ground_Truth), len(Tesseract))):
+        # remove \n and \r
+        Ground_Truth_Line = Ground_Truth[Line_Index].rstrip()
+        Tesseract_Line = Tesseract[Line_Index].rstrip()
+        # next we need to split the lines by spaces
+        Ground_Truth_Line_Words = Delete_Non_Letter(Ground_Truth_Line.split())
+        Tesseract_Line_Words = Delete_Non_Letter(Tesseract_Line.split())
+        Min_Length = min(len(Ground_Truth_Line_Words), len(Tesseract_Line_Words))
+        for word_index in range(Min_Length):
+            # first remove all non alphabet letter including ; , . / 0-9
+            Ground_Truth_Line_Word = clean_word(Ground_Truth_Line_Words[word_index])
+            Tesseract_Line_Word = clean_word(Tesseract_Line_Words[word_index])
+            if Ground_Truth_Line_Word != Tesseract_Line_Word and max(len(Ground_Truth_Line_Word), len(Tesseract_Line_Word))-min(len(Ground_Truth_Line_Word), len(Tesseract_Line_Word)) <= 1:
+                # Then we divided them into three different ways
+                # First if Ground_Truth_Line_Word is less than Tesseract_Line_Word, it should be Insertion
+                if len(Ground_Truth_Line_Word) < len(Tesseract_Line_Word):
+                    Insertion_Result = find_insertion_letters(Ground_Truth_Line_Word, Tesseract_Line_Word)
+                    pre_letter = Insertion_Result["pre_letter"]
+                    insert_letter = Insertion_Result["insert_letter"]
+                    if pre_letter != "" and insert_letter != "":
+                        pre_letter_index = getLetterIndex(pre_letter)
+                        insert_letter_index = getLetterIndex(insert_letter)
+                        Insertion_Confusion[pre_letter_index][insert_letter_index] = Insertion_Confusion[pre_letter_index][insert_letter_index] + 1
 
-                    # Second if Ground_Truth_Line_Word is larger than Tesseract_Line_Word, it should be Deletion
-                    elif len(Ground_Truth_Line_Word) > len(Tesseract_Line_Word):
-                        pass
+                # Second if Ground_Truth_Line_Word is larger than Tesseract_Line_Word, it should be Deletion
+                elif len(Ground_Truth_Line_Word) > len(Tesseract_Line_Word):
+                    Deletion_Result = find_deletion_letters(Ground_Truth_Line_Word, Tesseract_Line_Word)
+                    pre_letter = Deletion_Result["pre_letter"]
+                    delete_letter = Deletion_Result["delete_letter"]
+                    if pre_letter != "" and delete_letter != "":
+                        pre_letter_index = getLetterIndex(pre_letter)
+                        delete_letter_index = getLetterIndex(delete_letter)
+                        Deletion_Confusion[pre_letter_index][delete_letter_index] = Deletion_Confusion[pre_letter_index][delete_letter_index] + 1
 
-                    # Third if Ground_Truth_Line_Word is equal to Tesseract_Line_Word, it should be Substitution or Reversal
-                    else:
-                        pass
+                # Third if Ground_Truth_Line_Word is equal to Tesseract_Line_Word, it should be Substitution or Reversal
+                else:
+                    sub_rev_result = find_sub_rev_letters(Ground_Truth_Line_Word, Tesseract_Line_Word)
+                    tag = sub_rev_result["tag"]
+                    if tag == "sub":
+                        pre_letter = sub_rev_result["pre_letter"]
+                        changed_letter = sub_rev_result["changed_letter"]
+                        if pre_letter != "" and changed_letter != "":
+                            pre_letter_index = getLetterIndex(pre_letter)
+                            changed_letter_index = getLetterIndex(changed_letter)
+                            Substitution_Confusion[pre_letter_index][changed_letter_index] = Substitution_Confusion[pre_letter_index][changed_letter_index] + 1
+                    elif tag == "rev":
+                        pre_letter = sub_rev_result["pre_letter"]
+                        changed_letter = sub_rev_result["changed_letter"]
+                        if pre_letter != "" and changed_letter != "":
+                            pre_letter_index = getLetterIndex(pre_letter)
+                            changed_letter_index = getLetterIndex(changed_letter)
+                            Reversal_Confusion[pre_letter_index][changed_letter_index] = Reversal_Confusion[pre_letter_index][changed_letter_index] + 1
 
 
-            # print(Ground_Truth_Line_Words)
-            # print(Tesseract_Line_Words)
+print(Insertion_Confusion)
