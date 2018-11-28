@@ -1,5 +1,6 @@
 import os
 
+
 # Function to get the file end with .txt
 def Get_FileNames(path):
 
@@ -43,6 +44,29 @@ def filter_word(n):
 # print(set(filter(wordFilter, Ground_Truth_Words)))
 
 
+
+Ground_Truth_Path = "../data/ground_truth/"
+
+Tesseract_Path = "../data/tesseract/"
+
+Ground_Truth_Files = Get_FileNames(Ground_Truth_Path)
+
+File_Names = [filename[: -4] for filename in Ground_Truth_Files]
+
+Ground_Truth_Words = set()
+
+for FileName in File_Names:
+    File_Dir = Ground_Truth_Path + FileName + ".txt"
+    with open(File_Dir, 'r') as file:
+        file_Content = file.read()
+        uncleaned_word = file_Content.split()
+        Ground_Truth_Words = Ground_Truth_Words.union(set(map(clean_word,uncleaned_word)))
+
+
+Ground_Truth_Words = set(filter(clean_word2, Ground_Truth_Words))
+
+
+
 # Intert the letter into specific position in the string
 def Insert_Letter(String, Letter, Position):
     if Position <= 0:
@@ -78,10 +102,10 @@ def Reverse_Letter(String, Position1, Position2):
 
 
 
-# function for find the posibile candidates with inertation
-def Find_Candidates_Insertion(Typo, Ground_Truth_Words):
+# function for find the possibile candidates with inertation
+def Find_Candidates_Insertion(Typo):
     '''
-    
+
     '''
     Candidates = list()
     Candidates_Length = len(Typo) - 1
@@ -92,3 +116,26 @@ def Find_Candidates_Insertion(Typo, Ground_Truth_Words):
             if Typo == Temp_String:
                 Candidates.append((String, Typo[index], index))
     return(Candidates)
+
+# Next create table dictionary for deletion for each words
+Deletion_Dic = dict()
+
+for ground_truth_word in Ground_Truth_Words:
+    for index in range(len(ground_truth_word)):
+        temp_typo = Delete_Letter(ground_truth_word, index)
+        if temp_typo in Deletion_Dic:
+            Deletion_Dic[temp_typo].append((ground_truth_word, index))
+        else:
+            Deletion_Dic[temp_typo] = list()
+            Deletion_Dic[temp_typo].append((ground_truth_word, index))
+
+# function for find the possibile candidates with deletion
+def Find_Candidates_Deletion(Typo):
+    if Typo in Deletion_Dic:
+        return(Deletion_Dic[Typo])
+    else:
+        return([])
+
+
+
+# Next create tables
