@@ -332,8 +332,7 @@ def find_sub_rev_letters(ground_truth_word, tesseract_word):
         return({"tag": tag, "pre_letter" : pre_letter, "changed_letter": changed_letter})
     else:
         tag = ""
-        changed_letter = ""
-
+        pre_letter = ""
         changed_letter = ""
 
         return({"tag": tag, "pre_letter" : pre_letter, "changed_letter": changed_letter})
