@@ -1,6 +1,7 @@
 import os
 import string
 import difflib
+import collections
 
 
 # Function to get the file end with .txt
@@ -57,13 +58,17 @@ File_Names = [filename[: -4] for filename in Ground_Truth_Files]
 
 Ground_Truth_Words = set()
 
+All_Ground_Truth_Words = list()
+
 for FileName in File_Names:
     File_Dir = Ground_Truth_Path + FileName + ".txt"
     with open(File_Dir, 'r') as file:
         file_Content = file.read()
         uncleaned_word = file_Content.split()
+        All_Ground_Truth_Words += list(map(clean_word,uncleaned_word))
         Ground_Truth_Words = Ground_Truth_Words.union(set(map(clean_word,uncleaned_word)))
 
+All_Ground_Truth_Words = list(filter(clean_word2, All_Ground_Truth_Words))
 
 Ground_Truth_Words = set(filter(clean_word2, Ground_Truth_Words))
 
@@ -258,7 +263,7 @@ def find_deletion_letters(ground_truth_word, tesseract_word):
                     pre_letter = " "
                     delete_letter = ground_truth_word[a1]
 
-    if pre_letter in string.ascii_lowercase and delete_letter in string.ascii_lowercase:
+    if pre_letter in string.ascii_lowercase+" " and delete_letter in string.ascii_lowercase+" ":
         return({"pre_letter" : pre_letter, "delete_letter": delete_letter})
     else:
         pre_letter = ""
@@ -288,7 +293,7 @@ def find_insertion_letters(ground_truth_word, tesseract_word):
                     pre_letter = " "
                     insert_letter = tesseract_word[a1]
 
-    if pre_letter in string.ascii_lowercase and insert_letter in string.ascii_lowercase:
+    if pre_letter in string.ascii_lowercase+" " and insert_letter in string.ascii_lowercase+" ":
         return({"pre_letter" : pre_letter, "insert_letter": insert_letter})
     else:
         pre_letter = ""
@@ -328,7 +333,7 @@ def find_sub_rev_letters(ground_truth_word, tesseract_word):
             pre_letter = ground_truth_word[Differ_Index[0]]
             changed_letter = tesseract_word[Differ_Index[0]]
 
-    if pre_letter in string.ascii_lowercase and changed_letter in string.ascii_lowercase:
+    if pre_letter in string.ascii_lowercase+" " and changed_letter in string.ascii_lowercase+" ":
         return({"tag": tag, "pre_letter" : pre_letter, "changed_letter": changed_letter})
     else:
         tag = ""
@@ -418,3 +423,42 @@ def Create_Confusion_Matrix():
                                 Reversal_Confusion[pre_letter_index][changed_letter_index] = Reversal_Confusion[pre_letter_index][changed_letter_index] + 1
 
     return({"Deletion_Confusion": Deletion_Confusion, "Insertion_Confusion": Insertion_Confusion, "Substitution_Confusion": Substitution_Confusion, "Reversal_Confusion": Reversal_Confusion})
+
+
+# Next function will compute the pr(c) which means the prior of the correct words
+
+def Compute_Pr_c(correct_word):
+    N = len(All_Ground_Truth_Words)
+    V = len(Ground_Truth_Words)
+    denominator = N + V/2
+
+    word_freqs = collections.defaultdict(int)
+    for word in All_Ground_Truth_Words:
+        word_freqs[word] += 1
+
+    corr_probs = collections.defaultdict(float)
+    for word, freq in word_freqs.items():
+        corr_probs[word] = (freq + 0.5)/denominator
+
+    return(corr_probs[correct_word])
+
+
+
+# This function is used to create chars[x] and chars[xy]
+
+def CreateChars():
+    charsX = [0] * 26
+
+    charsXY = [[0] * 26 for i in range(26)]
+
+
+    for word in All_Ground_Truth_Words:
+
+        for letter_index1 in range(len(word)):
+            charsX[getLetterIndex(word[letter_index1])] += 1
+
+            for letter_index2 in range(letter_index1, len(word)):
+
+                charsXY[getLetterIndex(word[letter_index1])][getLetterIndex(word[letter_index2])] += 1
+
+    return({"charsX" : charsX, "charsXY": charsXY})
