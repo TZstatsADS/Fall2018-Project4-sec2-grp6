@@ -47,9 +47,9 @@ def filter_word(n):
 
 
 
-Ground_Truth_Path = "../data/ground_truth/"
+Ground_Truth_Path = "./data/ground_truth/"
 
-Tesseract_Path = "../data/tesseract/"
+Tesseract_Path = "./data/tesseract/"
 
 Ground_Truth_Files = Get_FileNames(Ground_Truth_Path)
 
