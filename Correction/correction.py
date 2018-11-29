@@ -1,3 +1,5 @@
-from correction_lib import Find_Candidates_Insertion, Find_Candidates_Deletion, Find_Candidates_Reverse, Find_Candidates_Substitution, Find_Possible_Candidates
+from correction_lib import Find_Possible_Candidates, Create_Confusion_Matrix
 
-print(Find_Possible_Candidates("acress"))
+Confusion = Create_Confusion_Matrix()
+
+print(Confusion["Deletion_Confusion"])
