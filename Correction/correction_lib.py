@@ -42,10 +42,6 @@ def filter_word(n):
             return False
     return(filter)
 
-# wordFilter = filter_word(5)
-#
-# print(set(filter(wordFilter, Ground_Truth_Words)))
-
 
 
 Ground_Truth_Path = "../data/ground_truth/"
@@ -216,7 +212,7 @@ def Find_Possible_Candidates(Typo):
 
     Possible_Candidates["Substitution"] = Find_Candidates_Substitution(Typo)
 
-    return(Possible_Candidates)
+    return({"Typo" : Typo, "Possible_Candidates": Possible_Candidates})
 
 
 

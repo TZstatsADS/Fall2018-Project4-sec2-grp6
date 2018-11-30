@@ -1,5 +1,9 @@
 from correction_lib import Create_Confusion_Matrix, All_Ground_Truth_Words, Compute_Pr_c
 from correction_lib import getLetterIndex, CreateChars, Find_Possible_Candidates
+from Create_Words_Dictionary import Create_Words_Dictionary
+
+Ground_Truth_Words_Dictionary = Create_Words_Dictionary()
+
 Confusion = Create_Confusion_Matrix()
 
 Deletion_Confusion = Confusion["Deletion_Confusion"]
@@ -22,6 +26,8 @@ Possible_Candidates = Find_Possible_Candidates(typo)
 
 def Find_Candidates_P_T_C_P_C(Candidates):
     Candidates_Posibility = list()
+    Typo = Candidates["Typo"]
+    Candidates = Candidates["Possible_Candidates"]
 
     for Candidate in Candidates:
         Candidate_List = Candidates[Candidate]
@@ -38,7 +44,7 @@ def Find_Candidates_P_T_C_P_C(Candidates):
                     t_p = letter
                     add_cpMinus1_tp = Insertion_Confusion[getLetterIndex(c_p_minus_1)][getLetterIndex(t_p)]
                     chars_cpMinus1 = charsX[getLetterIndex(c_p_minus_1)]
-                    Candidates_Posibility.append({"Cor": correct, "p_t_c" : add_cpMinus1_tp/chars_cpMinus1, "p_c" : Compute_Pr_c(correct), "p_t_c_p_c" : Compute_Pr_c(correct)*add_cpMinus1_tp/chars_cpMinus1})
+                    Candidates_Posibility.append({"Typo": Typo, "Cor": correct, "p_t_c" : add_cpMinus1_tp/chars_cpMinus1, "p_c" : Compute_Pr_c(correct), "p_t_c_p_c" : Compute_Pr_c(correct)*add_cpMinus1_tp/chars_cpMinus1})
 
             elif Candidate == "Deletion":
                 for candidate in Candidate_List:
@@ -51,7 +57,7 @@ def Find_Candidates_P_T_C_P_C(Candidates):
                     c_p = correct[position]
                     del_cpMinus1_cp = Deletion_Confusion[getLetterIndex(c_p_minus_1)][getLetterIndex(c_p)]
                     chars_cpMinus1_cp = charsXY[getLetterIndex(c_p_minus_1)][getLetterIndex(c_p)]
-                    Candidates_Posibility.append({"Cor": correct, "p_t_c" : del_cpMinus1_cp/chars_cpMinus1_cp, "p_c" : Compute_Pr_c(correct), "p_t_c_p_c" : Compute_Pr_c(correct)*add_cpMinus1_tp/chars_cpMinus1})
+                    Candidates_Posibility.append({"Typo": Typo, "Cor": correct, "p_t_c" : del_cpMinus1_cp/chars_cpMinus1_cp, "p_c" : Compute_Pr_c(correct), "p_t_c_p_c" : Compute_Pr_c(correct)*add_cpMinus1_tp/chars_cpMinus1})
 
             elif Candidate == "Reverse":
                 for candidate in Candidate_List:
@@ -60,7 +66,7 @@ def Find_Candidates_P_T_C_P_C(Candidates):
                     c_pos = correct[pos]
                     rev_c_pre_c_pos = Reversal_Confusion[getLetterIndex(c_pre)][getLetterIndex(c_pos)]
                     chars_c_pre_c_pos = charsXY[getLetterIndex(c_pre)][getLetterIndex(c_pos)]
-                    Candidates_Posibility.append({"Cor": correct, "p_t_c" : rev_c_pre_c_pos/chars_c_pre_c_pos, "p_c" : Compute_Pr_c(correct), "p_t_c_p_c" : Compute_Pr_c(correct)*add_cpMinus1_tp/chars_cpMinus1})
+                    Candidates_Posibility.append({"Typo": Typo, "Cor": correct, "p_t_c" : rev_c_pre_c_pos/chars_c_pre_c_pos, "p_c" : Compute_Pr_c(correct), "p_t_c_p_c" : Compute_Pr_c(correct)*add_cpMinus1_tp/chars_cpMinus1})
 
             elif Candidate == "Substitution":
                 for candidate in Candidate_List:
@@ -70,7 +76,7 @@ def Find_Candidates_P_T_C_P_C(Candidates):
                     t_p = letter
                     sub_tp_cp = Insertion_Confusion[getLetterIndex(t_p)][getLetterIndex(c_p)]
                     chars_cp = charsX[getLetterIndex(c_p)]
-                    Candidates_Posibility.append({"Cor": correct, "p_t_c" : sub_tp_cp/chars_cp, "p_c" : Compute_Pr_c(correct), "p_t_c_p_c" : Compute_Pr_c(correct)*add_cpMinus1_tp/chars_cpMinus1})
+                    Candidates_Posibility.append({"Typo": Typo, "Cor": correct, "p_t_c" : sub_tp_cp/chars_cp, "p_c" : Compute_Pr_c(correct), "p_t_c_p_c" : Compute_Pr_c(correct)*add_cpMinus1_tp/chars_cpMinus1})
 
     return(Candidates_Posibility)
 
