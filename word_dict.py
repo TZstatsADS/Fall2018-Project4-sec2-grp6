@@ -2,6 +2,9 @@ from correction_lib import All_Ground_Truth_Words, Ground_Truth_Words, File_Name
 from correction_lib import clean_word, clean_word2, Delete_Non_Letter
 import sys
 
+def abc():
+    pass
+
 def Create_Words_Dictionary():
     Ground_Truth_Word_Dict = dict()
 

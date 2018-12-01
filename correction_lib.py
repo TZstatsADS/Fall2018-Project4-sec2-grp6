@@ -218,8 +218,8 @@ def Find_Possible_Candidates(Typo):
 
 # get the letter index in the matrix
 def getLetterIndex(letter):
-
-    if letter == " ":
+    print(letter)
+    if letter in [' ', '{']:
         return(26)
     else:
         return(string.ascii_lowercase.index(letter))
@@ -256,10 +256,10 @@ def find_deletion_letters(ground_truth_word, tesseract_word):
                     pre_letter = ground_truth_word[a1-1]
                     delete_letter = ground_truth_word[a1]
                 else:
-                    pre_letter = " "
+                    pre_letter = "{"
                     delete_letter = ground_truth_word[a1]
 
-    if pre_letter in string.ascii_lowercase+" " and delete_letter in string.ascii_lowercase+" ":
+    if pre_letter in string.ascii_lowercase+"{" and delete_letter in string.ascii_lowercase+"{":
         return({"pre_letter" : pre_letter, "delete_letter": delete_letter})
     else:
         pre_letter = ""
@@ -286,10 +286,10 @@ def find_insertion_letters(ground_truth_word, tesseract_word):
                     pre_letter = ground_truth_word[a1-1]
                     insert_letter = tesseract_word[a1]
                 else:
-                    pre_letter = " "
+                    pre_letter = "{"
                     insert_letter = tesseract_word[a1]
 
-    if pre_letter in string.ascii_lowercase+" " and insert_letter in string.ascii_lowercase+" ":
+    if pre_letter in string.ascii_lowercase+"{" and insert_letter in string.ascii_lowercase+"{":
         return({"pre_letter" : pre_letter, "insert_letter": insert_letter})
     else:
         pre_letter = ""

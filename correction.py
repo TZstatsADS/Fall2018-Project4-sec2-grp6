@@ -126,4 +126,4 @@ def Find_Candidates_P_T_C_P_C(Candidates):
 
 
 
-# print(Find_Candidates_P_T_C_P_C(Possible_Candidates))
+print(Find_Candidates_P_T_C_P_C(Possible_Candidates))
