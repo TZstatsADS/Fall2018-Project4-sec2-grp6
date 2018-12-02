@@ -5,7 +5,7 @@ Project 3, Team 7
 This file is a note on contributions of team members.
 
 **Guo, Yaoqi**
-- Project Leader
+- Project leader
 - Implemented error detection, error correction, and performance measures.
 
 **Ji, Zhongce** 
