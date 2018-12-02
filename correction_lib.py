@@ -218,7 +218,6 @@ def Find_Possible_Candidates(Typo):
 
 # get the letter index in the matrix
 def getLetterIndex(letter):
-    print(letter)
     if letter in [' ', '{']:
         return(26)
     else:

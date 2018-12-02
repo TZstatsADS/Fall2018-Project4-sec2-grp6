@@ -65,11 +65,18 @@ def Create_Words_Dictionary():
     return(Ground_Truth_Word_Dict)
 
 
+# Returns:
+#     all word pairs that have dictinct word between ground truth and tesseract files
+#     the number of same word pairs between ground truth and tesseract files
 def Create_Word_Pair():
 
     Word_Pair = list()
 
     Word_Dict = dict()
+
+    num_corrections = 0
+
+    sum_corrections = [0, 0, 0]
 
     for FileName in File_Names:
         Word_Dict[FileName] = dict()
@@ -98,8 +105,16 @@ def Create_Word_Pair():
                 # first remove all non alphabet letter including ; , . / 0-9
                 Ground_Truth_Line_Word = clean_word(Ground_Truth_Line_Words[word_index])
                 Tesseract_Line_Word = clean_word(Tesseract_Line_Words[word_index])
+
+                sum_corrections[0] += len(Ground_Truth_Line_Word)
+                if 2 < len(Tesseract_Line_Word) < 21:
+                    sum_corrections[1] += len(Tesseract_Line_Word)
+                if Ground_Truth_Line_Word == Tesseract_Line_Word:
+                    num_corrections += 1
+                    sum_corrections[2] += len(Ground_Truth_Line_Word)
                 if Ground_Truth_Line_Word != Tesseract_Line_Word and max(len(Ground_Truth_Line_Word), len(Tesseract_Line_Word))-min(len(Ground_Truth_Line_Word), len(Tesseract_Line_Word)) <= 1:
-                    Word_Pair.append((Ground_Truth_Line_Word, Tesseract_Line_Word))
+                    Word_Pair.append((Ground_Truth_Line_Word, Tesseract_Line_Word, ))
+    Word_Pair.append((num_corrections, sum_corrections))
     return(Word_Pair)
 
 #
