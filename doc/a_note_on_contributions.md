@@ -1,6 +1,6 @@
 ### A Note on Contributions
 
-Project 3, Team 7
+Project 4, Team 6
 
 This file is a note on contributions of team members.
 
